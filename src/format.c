@@ -177,14 +177,27 @@ print_entries(LSEntry *entries, size_t count,
                             namebuf, sizeof(namebuf), opt);
 
         if (opt->long_format) {
+            LSOptions size_opt;
+            time_t display_time;
+
+            size_opt = *opt;
+            size_opt.kilobytes = 0;
+
+            if (opt->use_ctime) {
+                display_time = entries[i].st.st_ctime;
+            } else if (opt->use_atime) {
+                display_time = entries[i].st.st_atime;
+            } else {
+                display_time = entries[i].st.st_mtime;
+            }
+
             mode_string(entries[i].st.st_mode, mode);
 
             format_size(entries[i].st.st_size,
-                        opt, sizebuf, sizeof(sizebuf));
+                        &size_opt, sizebuf, sizeof(sizebuf));
 
-            format_time(entries[i].st.st_mtime,
+            format_time(display_time,
                         timebuf, sizeof(timebuf));
-
             printf("%s %3lu %-8s %-8s %8s %s ",
                    mode,
                    (unsigned long)entries[i].st.st_nlink,
@@ -193,7 +206,6 @@ print_entries(LSEntry *entries, size_t count,
                    sizebuf,
                    timebuf);
         }
-
         if (opt->inode) {
             printf("%lu ",
                    (unsigned long)entries[i].st.st_ino);
@@ -202,20 +214,45 @@ print_entries(LSEntry *entries, size_t count,
         if (opt->blocks) {
             long blocks;
 
-            blocks = (long)((entries[i].st.st_blocks * 512) / 1024);
+            blocks = (long)entries[i].st.st_blocks;
 
-            if (blocks < 1 && entries[i].st.st_size > 0) {
-                blocks = 1;
+            if (opt->human) {
+                double value;
+                const char *units[] = { "B", "K", "M", "G", "T", "P" };
+                size_t unit;
+
+                value = (double)blocks * 512.0;
+                unit = 0;
+
+                while (value >= 1024.0 &&
+                       unit < sizeof(units) / sizeof(units[0]) - 1) {
+                    value /= 1024.0;
+                    unit++;
+                }
+
+                if (unit == 0) {
+                    printf("%.0f%s ", value, units[unit]);
+                } else if (value < 10.0) {
+                    printf("%.1f%s ", value, units[unit]);
+                } else {
+                    printf("%.0f%s ", value, units[unit]);
+                }
+            } else {
+                if (opt->kilobytes) {
+                    blocks = (blocks + 1) / 2;
+                }
+
+                if (blocks < 1 && entries[i].st.st_size > 0) {
+                    blocks = 1;
+                }
+
+                printf("%ld ", blocks);
             }
-
-            printf("%ld ", blocks);
         }
-
         if (opt->classify) {
             char marker;
 
             marker = classify_char(&entries[i].st);
-
             if (marker != '\0') {
                 (void)snprintf(classified,
                                 sizeof(classified),

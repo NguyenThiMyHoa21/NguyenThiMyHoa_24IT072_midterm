@@ -30,16 +30,29 @@ compare_size(const void *a, const void *b)
 }
 
 static int
-compare_time(const void *a, const void *b)
+compare_time(const void *a, const void *b, const LSOptions *opt)
 {
     const LSEntry *ea = (const LSEntry *)a;
     const LSEntry *eb = (const LSEntry *)b;
+    time_t ta;
+    time_t tb;
 
-    if (ea->st.st_mtime < eb->st.st_mtime) {
+    if (opt->use_ctime) {
+        ta = ea->st.st_ctime;
+        tb = eb->st.st_ctime;
+    } else if (opt->use_atime) {
+        ta = ea->st.st_atime;
+        tb = eb->st.st_atime;
+    } else {
+        ta = ea->st.st_mtime;
+        tb = eb->st.st_mtime;
+    }
+
+    if (ta < tb) {
         return 1;
     }
 
-    if (ea->st.st_mtime > eb->st.st_mtime) {
+    if (ta > tb) {
         return -1;
     }
 
@@ -78,7 +91,24 @@ sort_entries(LSEntry *entries, size_t count,
     if (opt->sort_size) {
         qsort(entries, count, sizeof(*entries), compare_size);
     } else if (opt->sort_time) {
-        qsort(entries, count, sizeof(*entries), compare_time);
+        size_t i;
+        size_t j;
+
+        /*
+         * The time comparator needs LSOptions so that -u and -c
+         * can select atime and ctime respectively.
+         */
+        for (i = 0; i < count; i++) {
+            for (j = i + 1; j < count; j++) {
+                if (compare_time(&entries[i], &entries[j], opt) > 0) {
+                    LSEntry temp;
+
+                    temp = entries[i];
+                    entries[i] = entries[j];
+                    entries[j] = temp;
+                }
+            }
+        }
     } else {
         qsort(entries, count, sizeof(*entries), compare_name);
     }
