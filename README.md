@@ -1,6 +1,6 @@
 # Midterm Project: Implementation of `ls(1)` Utility
 
-> **Học phần:** Advanced Programming in the UNIX Environment (Lập Trình Hệ Thống)  
+> **Học phần:** Lập Trình Hệ Thống
 > **Sinh viên thực hiện:** Nguyễn Thị Mỹ Hoa  
 > **Mã số sinh viên:** 24IT072  
 > **GitHub Repository:** [NguyenThiMyHoa_24IT072_midterm](https://github.com/NguyenThiMyHoa21/NguyenThiMyHoa_24IT072_midterm)  
@@ -12,11 +12,11 @@
 
 Dự án hiện thực lại một phiên bản của tiện ích dòng lệnh **`ls(1)`** trên hệ điều hành **NetBSD**.
 
-Chương trình cho phép liệt kê thông tin tệp và thư mục trong hệ thống, hỗ trợ đầy đủ tập tùy chọn theo đặc tả, xử lý tốt các trường hợp biên (_edge cases_) và đảm bảo tính bền vững (_robustness_):
+Chương trình cho phép liệt kê thông tin tệp và thư mục trong hệ thống, hỗ trợ các tùy chọn được yêu cầu trong phạm vi bài tập và mô phỏng các chức năng chính của `ls(1)` trên NetBSD.
 
-- 🛡️ Phòng tránh hoàn toàn lỗi bộ nhớ (**Segmentation Fault**).
-- 🧹 Quản lý bộ nhớ chặt chẽ, **không xảy ra rò rỉ bộ nhớ (memory leaks)**.
-- ⚙️ Tuân thủ chuẩn định dạng và luồng xuất lỗi theo đặc tả `ls(1)` của NetBSD / POSIX.
+- Có kiểm tra lỗi cấp phát và thao tác hệ thống nhằm hạn chế lỗi bộ nhớ.
+- Các vùng nhớ động được giải phóng sau khi sử dụng trong các luồng xử lý chính.
+- Chương trình được tổ chức theo dạng mô-đun, hỗ trợ xử lý file, thư mục, file ẩn, sắp xếp và liệt kê đệ quy.
 
 ---
 
@@ -54,7 +54,7 @@ NguyenThiMyHoa_24IT072_midterm/
 
 ## 🛠️ 3. Danh sách các tùy chọn đã hiện thực (Supported Options)
 
-Chương trình hỗ trợ đầy đủ cú pháp:
+Chương trình sử dụng cú pháp:
 
 ```bash
 ls [-AacdFfhiklnqRrSstuw] [file ...]
@@ -68,8 +68,8 @@ ls [-AacdFfhiklnqRrSstuw] [file ...]
 |  `-a`  | Hiển thị tất cả các mục bao gồm cả `.` và `..` (_Show all files including . and .._).                   |
 |  `-c`  | Sử dụng thời gian thay đổi trạng thái tệp (`st_ctime`) thay cho mtime để sắp xếp/hiển thị.              |
 |  `-d`  | Liệt kê thư mục như tệp thông thường, không duyệt đệ quy vào trong (_List directories as plain files_). |
-|  `-F`  | Thêm ký tự phân loại loại tệp vào sau tên (_Classify file types_: `/`, `*`, `@`, `=`, `\|`, `%`).       |
-|  `-f`  | Không thực hiện sắp xếp đầu ra (_Do not sort output_). Mặc định bật cờ `-a`.                            |
+|  `-F`  | Thêm ký tự phân loại loại tệp vào sau tên (_Classify file types_: `/`, `*`, `@`, `=`, `\|`).            |
+|  `-f`  | Không thực hiện sắp xếp đầu ra (_Do not sort output_).                                                  |
 |  `-h`  | Hiển thị dung lượng tệp/block theo dạng dễ đọc cho người dùng (_Human-readable sizes_: B, K, M, G).     |
 |  `-i`  | Hiển thị số inode (`st_ino`) của mỗi tệp (_Display inode numbers_).                                     |
 |  `-k`  | Hiển thị kích thước block theo đơn vị Kilobytes (1024 bytes) (_Display sizes in kilobytes_).            |
@@ -95,7 +95,6 @@ Theo hướng dẫn của NetBSD `ls`, cờ xuất hiện **sau cùng (bên ph�
 > - **`-c` và `-u`**: Cờ xuất hiện sau cùng quyết định trường thời gian sử dụng (`ctime` hay `atime`).
 > - **`-R` và `-d`**: Cờ xuất hiện sau cùng quyết định hành vi duyệt đệ quy hay xem thư mục như tệp.
 > - **`-k` và `-h`**: Cờ xuất hiện sau cùng quyết định tính kích thước block theo KB hay Human-readable.
-> - **`-S` và `-t`**: Cờ xuất hiện sau cùng quyết định tiêu chí sắp xếp (dung lượng hay thời gian).
 
 ---
 
@@ -105,7 +104,7 @@ Theo hướng dẫn của NetBSD `ls`, cờ xuất hiện **sau cùng (bên ph�
 
 - **Hệ điều hành:** NetBSD/amd64
 - **Ngôn ngữ lập trình:** C (chuẩn **C11**)
-- **Trình biên dịch:** `cc` / `gcc`
+- **Trình biên dịch:** `cc` 
 - **Công cụ build:** `Make`
 - **Quản lý mã nguồn:** Git & GitHub
 
@@ -171,11 +170,11 @@ Dự án đã được kiểm thử toàn diện trên môi trường **NetBSD/a
    - Biên dịch thành công với cờ `-Wall -Wextra -Werror -std=c11`, không có lỗi hay cảnh báo.
 
 2. **Quản lý bộ nhớ an toàn (`Memory Safety`):**
-   - Mọi vùng nhớ được cấp phát động (`malloc`, `realloc`, `strdup`) đều được giải phóng hoàn chỉnh (`free`) sau khi sử dụng, không xảy ra rò rỉ bộ nhớ (_memory leaks_).
+   - Các vùng nhớ động được cấp phát trong quá trình xử lý được giải phóng sau khi sử dụng.
 
-3. **Xử lý trường hợp biên & Lỗi hệ thống:**
-   - Đã kiểm thử với nhiều loại operands (tệp đơn, nhiều tệp, thư mục, symlink, tệp không tồn tại, tệp không có quyền truy cập).
-   - Mọi lệnh gọi hệ thống (`opendir`, `readdir`, `lstat`, `stat`, `readlink`) đều được kiểm tra mã trả về. Khi xảy ra lỗi truy cập, chương trình xuất thông báo ra `stderr` và cập nhật exit code theo đúng chuẩn POSIX mà không bị sập.
+3. **Xử lý trường hợp biên & lỗi hệ thống:**
+   - Đã kiểm thử với nhiều dạng operand như file, thư mục, file ẩn và nhiều operand.
+   - Các thao tác chính với hệ thống file như `opendir()`, `readdir()` và `lstat()` được kiểm tra lỗi. Khi xảy ra lỗi, chương trình thông báo ra `stderr` và xử lý theo trạng thái lỗi phù hợp.
 
 ---
 
@@ -187,5 +186,5 @@ Dự án đã được kiểm thử toàn diện trên môi trường **NetBSD/a
 ---
 
 <p align="center">
-  <i>Nguyễn Thị Mỹ Hoa - 24IT072 | Advanced Programming in the UNIX Environment</i>
+  <i>Nguyễn Thị Mỹ Hoa - 24IT072 | Lập trình hệ thống</i>
 </p>
