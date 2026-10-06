@@ -1,6 +1,6 @@
 # Midterm Project: Implementation of `ls(1)` Utility
 
-> **Học phần:** Lập Trình Hệ Thống
+> **Học phần:** Lập Trình Hệ Thống  
 > **Sinh viên thực hiện:** Nguyễn Thị Mỹ Hoa  
 > **Mã số sinh viên:** 24IT072  
 > **GitHub Repository:** [NguyenThiMyHoa_24IT072_midterm](https://github.com/NguyenThiMyHoa21/NguyenThiMyHoa_24IT072_midterm)  
