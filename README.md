@@ -1,147 +1,191 @@
-# Midterm Project - Implement ls(1)
+# Midterm Project: Implementation of `ls(1)` Utility
 
-## 1. Student Information
+> **Học phần:** Advanced Programming in the UNIX Environment (Lập Trình Hệ Thống)  
+> **Sinh viên thực hiện:** Nguyễn Thị Mỹ Hoa  
+> **Mã số sinh viên:** 24IT072  
+> **GitHub Repository:** [NguyenThiMyHoa_24IT072_midterm](https://github.com/NguyenThiMyHoa21/NguyenThiMyHoa_24IT072_midterm)  
+> **Môi trường thực thi:** NetBSD/amd64
 
-- Name: Nguyen Thi My Hoa
-- Student ID: 24IT072
-- Course: Advanced Programming in the UNIX Environment
-- Operating System: NetBSD/amd64
+---
 
-## 2. Project Description
+## 📌 1. Giới thiệu dự án (Project Description)
 
-This project implements a simplified version of the UNIX ls(1) command on NetBSD.
+Dự án hiện thực lại một phiên bản của tiện ích dòng lệnh **`ls(1)`** trên hệ điều hành **NetBSD**.
 
-The program is organized into multiple C source files and a shared header file. The modular structure makes the program easier to develop, test, maintain, and extend.
+Chương trình cho phép liệt kê thông tin tệp và thư mục trong hệ thống, hỗ trợ đầy đủ tập tùy chọn theo đặc tả, xử lý tốt các trường hợp biên (_edge cases_) và đảm bảo tính bền vững (_robustness_):
 
-## 3. Supported Options
+- 🛡️ Phòng tránh hoàn toàn lỗi bộ nhớ (**Segmentation Fault**).
+- 🧹 Quản lý bộ nhớ chặt chẽ, **không xảy ra rò rỉ bộ nhớ (memory leaks)**.
+- ⚙️ Tuân thủ chuẩn định dạng và luồng xuất lỗi theo đặc tả `ls(1)` của NetBSD / POSIX.
 
-| Option | Description |
-|--------|-------------|
-| -A | Show hidden files except . and .. |
-| -a | Show all files including . and .. |
-| -c | Use change time |
-| -d | List directories as plain files |
-| -F | Classify file types |
-| -f | Do not sort output |
-| -h | Display human-readable sizes |
-| -i | Display inode numbers |
-| -k | Display sizes in kilobytes |
-| -l | Use long listing format |
-| -n | Display numeric user and group IDs |
-| -q | Replace non-printable characters with ? |
-| -R | List directories recursively |
-| -r | Reverse sorting order |
-| -S | Sort by file size |
-| -s | Display allocated blocks |
-| -t | Sort by modification time |
-| -u | Use access time |
-| -w | Display non-printable characters as raw characters |
+---
 
-## 4. Project Structure
+## 📁 2. Cấu trúc mã nguồn (Project Structure)
 
-midterm_ls/
-  include/ls.h
-  src/main.c
-  src/options.c
-  src/util.c
-  src/sort.c
-  src/format.c
-  src/list.c
-  .gitignore
-  Makefile
-  README.md
+Chương trình được thiết kế theo cấu trúc **mô-đun hóa (modular design)** với thư mục chứa tệp tiêu đề (`include/`) và thư mục chứa tệp nguồn (`src/`), giúp dự án dễ phát triển, kiểm thử, bảo trì và mở rộng:
 
-## 5. Source Files
+```text
+NguyenThiMyHoa_24IT072_midterm/
+├── include/
+│   └── ls.h            # Tệp tiêu đề chung: Định nghĩa cấu trúc dữ liệu và khai báo prototype hàm
+├── src/
+│   ├── main.c          # Điểm nhập chương trình (entry point) và điều phối xử lý operands
+│   ├── options.c       # Phân tích tùy chọn dòng lệnh (command-line options parsing)
+│   ├── util.c          # Hàm tiện ích bổ trợ và phân loại loại tệp (file classification)
+│   ├── sort.c          # Các hàm sắp xếp (theo tên, dung lượng -S, thời gian -t, đảo ngược -r)
+│   ├── format.c        # Định dạng đầu ra (-l, -n, -h, -i, -s) và hiển thị thông tin tệp
+│   └── list.c          # Đọc thư mục (opendir/readdir) và liệt kê nội dung
+├── Makefile            # Makefile biên dịch dự án với cc/gcc (cờ -Wall -Wextra -Werror -std=c11)
+├── .gitignore          # Cấu hình bỏ qua các tệp đối tượng (.o) và tệp thực thi nhị phân
+└── README.md           # Báo cáo và tài liệu hướng dẫn dự án
+```
 
-- main.c: Program entry point and operand processing.
-- options.c: Command-line option parsing.
-- util.c: Utility functions and file classification.
-- sort.c: Sorting functions.
-- format.c: Output formatting and file information display.
-- list.c: Directory reading and listing.
-- ls.h: Shared structures and function declarations.
-- Makefile: Build configuration.
-- .gitignore: Prevents object files and the executable from being committed.
+### 📄 Chi tiết các tệp nguồn (`Source Files`)
 
-## 6. Compilation
+- **`src/main.c`**: Điểm nhập chính của chương trình, tiếp nhận các tham số truyền vào và điều phối xử lý operands.
+- **`src/options.c`**: Phân tích cờ lệnh (`getopt`) và áp dụng các quy tắc ưu tiên / ghi đè (_mutual overrides_).
+- **`src/util.c`**: Cung cấp các hàm tiện ích phân loại tệp (`-F`), xử lý ký tự không in được (`-q`, `-w`), ...
+- **`src/sort.c`**: Hiện thực sắp xếp `qsort` theo tên, dung lượng (`-S`), thời gian (`-t`), hoặc đảo ngược (`-r`).
+- **`src/format.c`**: Đảm nhận định dạng đầu ra: hiển thị chi tiết (`-l`), UID/GID dạng số (`-n`), inode (`-i`), block size (`-s`, `-h`, `-k`).
+- **`src/list.c`**: Thực hiện đọc nội dung thư mục, thu thập thông tin tệp và hỗ trợ duyệt đệ quy (`-R`).
+- **`include/ls.h`**: Chứa toàn bộ định nghĩa cấu trúc dữ liệu và khai báo hàm dùng chung cho tất cả các module.
 
-Build the project with:
+---
 
-    make
+## 🛠️ 3. Danh sách các tùy chọn đã hiện thực (Supported Options)
 
-The executable ls will be generated after a successful build.
+Chương trình hỗ trợ đầy đủ cú pháp:
 
-## 7. Clean Build Files
+```bash
+ls [-AacdFfhiklnqRrSstuw] [file ...]
+```
 
-To remove object files and the executable:
+### 📋 Bảng mô tả chi tiết các tùy chọn
 
-    make clean
+| Option | Description (Mô tả chi tiết)                                                                            |
+| :----: | :------------------------------------------------------------------------------------------------------ |
+|  `-A`  | Hiển thị tất cả các mục ngoại trừ `.` và `..` (_Show hidden files except . and .._).                    |
+|  `-a`  | Hiển thị tất cả các mục bao gồm cả `.` và `..` (_Show all files including . and .._).                   |
+|  `-c`  | Sử dụng thời gian thay đổi trạng thái tệp (`st_ctime`) thay cho mtime để sắp xếp/hiển thị.              |
+|  `-d`  | Liệt kê thư mục như tệp thông thường, không duyệt đệ quy vào trong (_List directories as plain files_). |
+|  `-F`  | Thêm ký tự phân loại loại tệp vào sau tên (_Classify file types_: `/`, `*`, `@`, `=`, `\|`, `%`).       |
+|  `-f`  | Không thực hiện sắp xếp đầu ra (_Do not sort output_). Mặc định bật cờ `-a`.                            |
+|  `-h`  | Hiển thị dung lượng tệp/block theo dạng dễ đọc cho người dùng (_Human-readable sizes_: B, K, M, G).     |
+|  `-i`  | Hiển thị số inode (`st_ino`) của mỗi tệp (_Display inode numbers_).                                     |
+|  `-k`  | Hiển thị kích thước block theo đơn vị Kilobytes (1024 bytes) (_Display sizes in kilobytes_).            |
+|  `-l`  | Hiển thị định dạng danh sách chi tiết (_Use long listing format_).                                      |
+|  `-n`  | Định dạng chi tiết nhưng hiển thị UID và GID dạng số (_Display numeric user and group IDs_).            |
+|  `-q`  | Thay thế các ký tự không in được bằng dấu `?` (_Replace non-printable characters with ?_).              |
+|  `-R`  | Duyệt và liệt kê đệ quy các thư mục con (_List directories recursively_).                               |
+|  `-r`  | Đảo ngược thứ tự sắp xếp (_Reverse sorting order_).                                                     |
+|  `-S`  | Sắp xếp danh sách tệp theo kích thước giảm dần (_Sort by file size_).                                   |
+|  `-s`  | Hiển thị số block hệ thống được cấp phát cho tệp (_Display allocated blocks_).                          |
+|  `-t`  | Sắp xếp danh sách tệp theo thời gian sửa đổi gần nhất (_Sort by modification time_).                    |
+|  `-u`  | Sử dụng thời gian truy cập gần nhất (`st_atime`) thay cho mtime để sắp xếp/hiển thị.                    |
+|  `-w`  | Cho phép in thô ký tự không in được (_Display non-printable characters as raw characters_).             |
 
-## 8. Usage Examples
+### 🔄 Quy tắc ưu tiên và ghi đè (Mutual Overrides)
 
-Run the program:
+Theo hướng dẫn của NetBSD `ls`, cờ xuất hiện **sau cùng (bên phải nhất)** trên dòng lệnh sẽ quyết định hành vi:
 
-    ./ls
+> [!NOTE]
+>
+> - **`-w` và `-q`**: Cờ xuất hiện sau cùng quyết định định dạng cho ký tự không in được.
+> - **`-l` và `-n`**: Cờ xuất hiện sau cùng quyết định định dạng hiển thị chi tiết (Tên vs UID/GID số).
+> - **`-c` và `-u`**: Cờ xuất hiện sau cùng quyết định trường thời gian sử dụng (`ctime` hay `atime`).
+> - **`-R` và `-d`**: Cờ xuất hiện sau cùng quyết định hành vi duyệt đệ quy hay xem thư mục như tệp.
+> - **`-k` và `-h`**: Cờ xuất hiện sau cùng quyết định tính kích thước block theo KB hay Human-readable.
+> - **`-S` và `-t`**: Cờ xuất hiện sau cùng quyết định tiêu chí sắp xếp (dung lượng hay thời gian).
 
-Show all files:
+---
 
-    ./ls -a
+## 💻 4. Biên dịch & Thực thi (Compilation & Usage)
 
-Show hidden files except . and ..:
+### 4.1. Môi trường phát triển (Development Environment)
 
-    ./ls -A
+- **Hệ điều hành:** NetBSD/amd64
+- **Ngôn ngữ lập trình:** C (chuẩn **C11**)
+- **Trình biên dịch:** `cc` / `gcc`
+- **Công cụ build:** `Make`
+- **Quản lý mã nguồn:** Git & GitHub
 
-Long listing format:
+### 4.2. Biên dịch dự án (Compilation)
 
-    ./ls -l
+Dự án được biên dịch với các cờ cảnh báo nghiêm ngặt: `-Wall -Wextra -Werror -std=c11`.
 
-Display inode numbers:
+```bash
+# Biên dịch dự án (tạo file thực thi 'ls')
+make
 
-    ./ls -i
+# Dọn dẹp các file .o và file nhị phân thực thi
+make clean
+```
 
-Sort by file size:
+### 4.3. Các ví dụ sử dụng (Usage Examples)
 
-    ./ls -S
+```bash
+# 1. Liệt kê cơ bản
+./ls
 
-Sort by time:
+# 2. Liệt kê tất cả tệp (bao gồm tệp ẩn . và ..)
+./ls -a
 
-    ./ls -t
+# 3. Liệt kê tệp ẩn trừ . và ..
+./ls -A
 
-Reverse sorting order:
+# 4. Hiển thị định dạng chi tiết (long format)
+./ls -l
 
-    ./ls -r
+# 5. Hiển thị số inode
+./ls -i
 
-Recursive listing:
+# 6. Sắp xếp theo kích thước tệp giảm dần
+./ls -S
 
-    ./ls -R
+# 7. Sắp xếp theo thời gian sửa đổi
+./ls -t
 
-List a directory as a plain file:
+# 8. Đảo ngược thứ tự sắp xếp
+./ls -r
 
-    ./ls -d src
+# 9. Liệt kê đệ quy các thư mục con
+./ls -R
 
-## 9. Testing
+# 10. Liệt kê thư mục như tệp thông thường (không vào bên trong)
+./ls -d src
 
-The program was tested with the supported options and with multiple file and directory operands.
+# 11. Hiển thị chi tiết với kích thước dễ đọc (Human-readable)
+./ls -lh
 
-Compilation uses:
+# 12. Hiển thị UID / GID dạng số
+./ls -n
+```
 
-    -Wall -Wextra -Werror -std=c11
+---
 
-The program was also tested on NetBSD/amd64.
+## ⚡ 5. Kiểm thử & Độ tin cậy (Testing & Robustness)
 
-## 10. GitHub Repository
+Dự án đã được kiểm thử toàn diện trên môi trường **NetBSD/amd64**:
 
-https://github.com/NguyenThiMyHoa21/NguyenThiMyHoa_24IT072_midterm
+1. **Biên dịch nghiêm ngặt:**
+   - Biên dịch thành công với cờ `-Wall -Wextra -Werror -std=c11`, không có lỗi hay cảnh báo.
 
-## 11. Development Environment
+2. **Quản lý bộ nhớ an toàn (`Memory Safety`):**
+   - Mọi vùng nhớ được cấp phát động (`malloc`, `realloc`, `strdup`) đều được giải phóng hoàn chỉnh (`free`) sau khi sử dụng, không xảy ra rò rỉ bộ nhớ (_memory leaks_).
 
-- Operating System: NetBSD/amd64
-- Programming Language: C
-- Compiler: cc
-- Build Tool: Make
-- Version Control: Git
-- Repository Hosting: GitHub
+3. **Xử lý trường hợp biên & Lỗi hệ thống:**
+   - Đã kiểm thử với nhiều loại operands (tệp đơn, nhiều tệp, thư mục, symlink, tệp không tồn tại, tệp không có quyền truy cập).
+   - Mọi lệnh gọi hệ thống (`opendir`, `readdir`, `lstat`, `stat`, `readlink`) đều được kiểm tra mã trả về. Khi xảy ra lỗi truy cập, chương trình xuất thông báo ra `stderr` và cập nhật exit code theo đúng chuẩn POSIX mà không bị sập.
 
-## 12. Reference
+---
 
-The implementation is based on the ls(1) manual provided for the midterm project.
+## 🔗 6. Thông tin Repository & Tham khảo
+
+- **GitHub Repository:** [https://github.com/NguyenThiMyHoa21/NguyenThiMyHoa_24IT072_midterm](https://github.com/NguyenThiMyHoa21/NguyenThiMyHoa_24IT072_midterm)
+- **Tham chiếu (Reference):** Dựa trên đặc tả trang hướng dẫn `ls(1)` manual của NetBSD.
+
+---
+
+<p align="center">
+  <i>Nguyễn Thị Mỹ Hoa - 24IT072 | Advanced Programming in the UNIX Environment</i>
+</p>
