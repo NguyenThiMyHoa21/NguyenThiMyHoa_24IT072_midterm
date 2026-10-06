@@ -35,7 +35,7 @@ NguyenThiMyHoa_24IT072_midterm/
 │   ├── sort.c          # Các hàm sắp xếp (theo tên, dung lượng -S, thời gian -t, đảo ngược -r)
 │   ├── format.c        # Định dạng đầu ra (-l, -n, -h, -i, -s) và hiển thị thông tin tệp
 │   └── list.c          # Đọc thư mục (opendir/readdir) và liệt kê nội dung
-├── Makefile            # Makefile biên dịch dự án với cc/gcc (cờ -Wall -Wextra -Werror -std=c11)
+├── Makefile            # Makefile biên dịch dự án với cc (cờ -Wall -Wextra -Werror -std=c11)
 ├── .gitignore          # Cấu hình bỏ qua các tệp đối tượng (.o) và tệp thực thi nhị phân
 └── README.md           # Báo cáo và tài liệu hướng dẫn dự án
 ```
@@ -164,7 +164,7 @@ make clean
 
 ## ⚡ 5. Kiểm thử & Độ tin cậy (Testing & Robustness)
 
-Dự án đã được kiểm thử toàn diện trên môi trường **NetBSD/amd64**:
+Dự án đã được kiểm thử trên môi trường **NetBSD/amd64** với nhiều tùy chọn và trường hợp sử dụng khác nhau:
 
 1. **Biên dịch nghiêm ngặt:**
    - Biên dịch thành công với cờ `-Wall -Wextra -Werror -std=c11`, không có lỗi hay cảnh báo.
