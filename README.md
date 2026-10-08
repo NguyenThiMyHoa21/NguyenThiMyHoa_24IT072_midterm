@@ -70,9 +70,9 @@ ls [-AacdFfhiklnqRrSstuw] [file ...]
 |  `-d`  | Liệt kê thư mục như tệp thông thường, không duyệt đệ quy vào trong (_List directories as plain files_). |
 |  `-F`  | Thêm ký tự phân loại loại tệp vào sau tên (_Classify file types_: `/`, `*`, `@`, `=`, `\|`).            |
 |  `-f`  | Không thực hiện sắp xếp đầu ra (_Do not sort output_).                                                  |
-|  `-h`  | Hiển thị dung lượng tệp/block theo dạng dễ đọc cho người dùng (_Human-readable sizes_: B, K, M, G).     |
+|  `-h`  | Hiển thị kích thước theo dạng dễ đọc cho người dùng (*Human-readable sizes*).                           |
 |  `-i`  | Hiển thị số inode (`st_ino`) của mỗi tệp (_Display inode numbers_).                                     |
-|  `-k`  | Hiển thị kích thước block theo đơn vị Kilobytes (1024 bytes) (_Display sizes in kilobytes_).            |
+|  `-k`  | Hiển thị số block theo đơn vị KB khi sử dụng với `-s` (*Display allocated blocks in kilobytes*).        |
 |  `-l`  | Hiển thị định dạng danh sách chi tiết (_Use long listing format_).                                      |
 |  `-n`  | Định dạng chi tiết nhưng hiển thị UID và GID dạng số (_Display numeric user and group IDs_).            |
 |  `-q`  | Thay thế các ký tự không in được bằng dấu `?` (_Replace non-printable characters with ?_).              |
@@ -170,7 +170,7 @@ Dự án đã được kiểm thử trên môi trường **NetBSD/amd64** với 
    - Biên dịch thành công với cờ `-Wall -Wextra -Werror -std=c11`, không có lỗi hay cảnh báo.
 
 2. **Quản lý bộ nhớ an toàn (`Memory Safety`):**
-   - Các vùng nhớ động được cấp phát trong quá trình xử lý được giải phóng sau khi sử dụng.
+   - Chương trình có thực hiện giải phóng các vùng nhớ động sau khi sử dụng trong các luồng xử lý chính.
 
 3. **Xử lý trường hợp biên & lỗi hệ thống:**
    - Đã kiểm thử với nhiều dạng operand như file, thư mục, file ẩn và nhiều operand.
