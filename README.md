@@ -10,9 +10,9 @@
 
 ## 📌 1. Giới thiệu dự án (Project Description)
 
-Dự án hiện thực lại một phiên bản của tiện ích dòng lệnh **`ls(1)`** trên hệ điều hành **NetBSD**.
+Dự án hiện thực lại một phiên bản của tiện ích dòng lệnh **`ls`** trên hệ điều hành **NetBSD**.
 
-Chương trình cho phép liệt kê thông tin tệp và thư mục trong hệ thống, hỗ trợ các tùy chọn được yêu cầu trong phạm vi bài tập và mô phỏng các chức năng chính của `ls(1)` trên NetBSD.
+Chương trình cho phép liệt kê thông tin tệp và thư mục trong hệ thống, hỗ trợ các tùy chọn được yêu cầu trong phạm vi bài tập và mô phỏng các chức năng chính của `ls` trên NetBSD.
 
 - Có kiểm tra lỗi cấp phát và thao tác hệ thống nhằm hạn chế lỗi bộ nhớ.
 - Các vùng nhớ động được giải phóng sau khi sử dụng trong các luồng xử lý chính.
@@ -181,7 +181,7 @@ Dự án đã được kiểm thử trên môi trường **NetBSD/amd64** với 
 ## 🔗 6. Thông tin Repository & Tham khảo
 
 - **GitHub Repository:** [https://github.com/NguyenThiMyHoa21/NguyenThiMyHoa_24IT072_midterm](https://github.com/NguyenThiMyHoa21/NguyenThiMyHoa_24IT072_midterm)
-- **Tham chiếu (Reference):** Dựa trên đặc tả trang hướng dẫn `ls(1)` manual của NetBSD.
+- **Tham chiếu (Reference):** Dựa trên đặc tả trang hướng dẫn `ls` manual của NetBSD.
 
 ---
 
