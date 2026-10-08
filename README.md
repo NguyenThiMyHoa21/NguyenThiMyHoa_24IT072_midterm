@@ -1,4 +1,4 @@
-# Midterm Project: Implementation of `ls(1)` Utility
+# Midterm Project: Implementation of `ls` Utility
 
 > **Học phần:** Lập Trình Hệ Thống  
 > **Sinh viên thực hiện:** Nguyễn Thị Mỹ Hoa  
